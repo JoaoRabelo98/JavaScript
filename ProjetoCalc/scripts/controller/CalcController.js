@@ -11,14 +11,30 @@ class CalcController{
     
 
     initialize(){ // start initialize
+        this.setDisplayDateTime();
         //indicamos que essa ação irá se repetir no intervalo de milisegundos 
-        setInterval(()=>{ // start setInterval
-            this.displayDate = this.currentDate.toLocaleDateString(this._locale);
-            this.displayTime = this.currentDate.toLocaleTimeString(this._locale);
+        setInterval(()=>{ // start setInterval que ira repetir a cada 1 segundo. 
+           this.setDisplayDateTime();
         }, 1000); // end setInterval \\ // indicando os milisegundos \\
-
         
+        //===================================================\\
+
+       /* setTimeout(() => {
+            clearInterval(interval); // podemos utilizar o timeout para que pare de executar determinado comando em algum momento.
+        }, 10000); */       
+
+        //===================================================\\
+
     } // end initialize
+
+    setDisplayDateTime(){
+        this.displayDate = this.currentDate.toLocaleDateString(this._locale,{
+            day: "2-digit", 
+            month: "long", 
+            year:"numeric"
+        });
+        this.displayTime = this.currentDate.toLocaleTimeString(this._locale);
+    }
 
     get displayCalc(){ // start getDisplay
         return this._displayCalcEl.innerHTML;
