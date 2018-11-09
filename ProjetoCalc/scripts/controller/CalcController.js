@@ -7,6 +7,7 @@ class CalcController{
         this._dateCalcEl = document.querySelector("#data");// indicando que o valor aonde o ID determinado por # terá esse valor
         this._timeCalcEl = document.querySelector("#hora"); // indicando que o valor aonde o ID determinado por # terá esse valor
         this.initialize(); // toda vez que chamarmos o metodo, essa ação é executada. 
+        this.initButtonsEvents();
     }
     
 
@@ -62,5 +63,25 @@ class CalcController{
     set displayDate(value){  // start setDisplayDate
         this._dateCalcEl.innerHTML = value; 
     } // end setDisplayDate
+//===============================================================================\\
+
+    addEventListenerAll(element,events, fn){
+
+        events.split(' ').forEach(event => {
+            element.addEventListener(events, fn , false);
+        });
+
+    }
+
+    initButtonsEvents(){ // start initButtonsEvents
+        let buttons = document.querySelectorAll("#buttons > g, #parts > g"); // estamoos pegando todos os resultados dos parametros passados
+
+        buttons.forEach((btn, index)=>{
+            this.addEventListenerAll(btn, 'click drag mouseover', e => {
+                console.log(btn.className.baseVal.replace("btn-",""));
+            });
+        });
+    } // end initButtonsEvents 
+
 
 }
