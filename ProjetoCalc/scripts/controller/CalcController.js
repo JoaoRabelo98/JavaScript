@@ -1,6 +1,7 @@
 class CalcController{
 
     constructor(){
+        this._operation = [];
         let date = new Date(); //estamos instanciando a classe Date();
         this._locale = "pt-BR";
         this._displayCalcEl = document.querySelector("#display"); // indicando que o valor aonde o ID determinado por # terá esse valor
@@ -65,20 +66,30 @@ class CalcController{
     } // end setDisplayDate
 //===============================================================================\\
 
-    addEventListenerAll(element,events, fn){
-
+    execBtn(valu){
+        switch(value){
+            case 'ac':
+                
+            break;
+        }
+    }
+//===============================================================================\\
+    addEventListenerAll(element,events, fn){ // criamos o addEventListenerAll para permitir que vários eventos sejam executados simultaneamente. 
         events.split(' ').forEach(event => {
-            element.addEventListener(events, fn , false);
+           element.addEventListener(event, fn, false);
+           element.style.cursor = "pointer";
         });
 
-    }
+    } // end addEventListenetAll
+
 
     initButtonsEvents(){ // start initButtonsEvents
         let buttons = document.querySelectorAll("#buttons > g, #parts > g"); // estamoos pegando todos os resultados dos parametros passados
 
         buttons.forEach((btn, index)=>{
-            this.addEventListenerAll(btn, 'click drag mouseover', e => {
-                console.log(btn.className.baseVal.replace("btn-",""));
+            this.addEventListenerAll(btn, "click drag", e => { // estamos chamando o EventListenerAll
+                let textBtn = btn.className.baseVal.replace("btn-",""); //estamos aplicando o value do btn a variaval textBtn
+                this.execBtn(textBtn);
             });
         });
     } // end initButtonsEvents 
