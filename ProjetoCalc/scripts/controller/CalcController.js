@@ -1,6 +1,8 @@
 class CalcController{
 
     constructor(){
+        this._audio = new Audio('click.mp3');
+        this._audioOnOff = false;
         this._lastOperator = '';
         this._lastNumber = '';
 
@@ -12,9 +14,32 @@ class CalcController{
         this._timeCalcEl = document.querySelector("#hora"); // indicando que o valor aonde o ID determinado por # terá esse valor
         this.initialize(); // toda vez que chamarmos o metodo, essa ação é executada. 
         this.initButtonsEvents();
+        this.initKeyboard();
+        this.pasteFromClipboar();
+    }
+
+    pasteFromClipboar(){
+        document.addEventListener('paste' , e=>{
+            let text = e.clipboardData.getData('Text');
+
+            this.displayCalc = parseFloat(text);
+            console.log(text);
+        });
+    }
+
+    copyToClipboard(){
+        let input = document.createElement('input');
+        input.value = this.displayCalc;
+
+        document.body.appendChild(input);
+
+        input.select();
+
+        document.execCommand("Copy");
+
+        input.remove();
     }
     
-
     initialize(){ // start initialize
         this.setDisplayDateTime();
         //indicamos que essa ação irá se repetir no intervalo de milisegundos 
@@ -30,7 +55,28 @@ class CalcController{
 
         //===================================================\\
         this.setLastNumberToDisplay();
+
+        document.querySelectorAll('.btn-ac').forEach(btn => {
+
+            btn.addEventListener('dblclick', e => {
+                this.toggleAudio();
+            })
+
+        });
+        
+
     } // end initialize
+
+    toggleAudio(){
+        this._audioOnOff = !this._audioOnOff;
+    }
+
+    playAudio(){
+        if(this._audioOnOff) {
+            this._audio.currentTime = 0; 
+            this._audio.play();
+        }
+    }
 
     setDisplayDateTime(){ // function setDisplayTime setada para indicar data e hora
         this.displayDate = this.currentDate.toLocaleDateString(this._locale,{
@@ -45,9 +91,61 @@ class CalcController{
         return this._displayCalcEl.innerHTML;
     }//end getDisplay
 
-    set displayCalc(displayCalc){ //start setDisplay
-        this._displayCalcEl.innerHTML = displayCalc;
+    set displayCalc(value){ //start setDisplay
+        if(value.toString().length > 10){
+            this.setError(); 
+            return;
+        }
+        this._displayCalcEl.innerHTML = value;
     } // end setDisplay
+//==============================================================================\\
+
+    initKeyboard(){
+        
+        document.addEventListener('keyup', e=>{
+            this.playAudio();
+            switch(e.key){
+                case 'Escape':
+                    this.clearAll();                
+                    break;
+                case 'Backspace':
+                    this.clearEntry();
+                    break;
+                case '+':
+                case '-':
+                case '*':
+                case '/':
+                case '%': 
+                    this.addOperation(e.key);
+                    break;                    
+                case 'Enter':
+                case '=':
+                    this.calc();
+                    break;
+                case '.':
+                case ',':
+                    this.addDot();
+                    break;
+                case '0':
+                case '1': 
+                case '2': 
+                case '3':
+                case '4': 
+                case '5':
+                case '6':
+                case '7': 
+                case '8':
+                case '9': 
+                    this.addOperation(parseInt(e.key));
+                    break;
+                case 'c':
+                    if(e.ctrlKey) this.copyToClipboard();
+                    break;
+    
+            }
+        });
+    }
+
 //==============================================================================\\
     get currentDate(){ // start getCurrentDate
         return new Date();
@@ -71,6 +169,8 @@ class CalcController{
 
     clearAll(){ //function clearAll
         this._operation = [];
+        this._lastNumber = '';
+        this._lastOperator = '';
         this.setLastNumberToDisplay();
     } // end function clearALL
 
@@ -99,7 +199,13 @@ class CalcController{
     }
 
     getResult(){
-        return  eval(this._operation.join(""));
+        try{
+            return  eval(this._operation.join(""));
+        }catch (e){
+            setTimeout(()=>{
+                this.setError();
+            },1);            
+        }    
     }
 
     calc(){
@@ -179,8 +285,6 @@ class CalcController{
             //String
             if(this.isOperator(value)){ // verificando se é um operador utilizando o metodo isOperator
                 this.setLastOperation(value); 
-            }else if (isNaN(value)){ // valida se o ultimo numero digitado é um numero 
-                console.log(value); //imprime o valor
             }else{// caso não seja os valores acima, vai inserir um valor
               this.pushOperation(value);
               this.setLastNumberToDisplay();
@@ -192,7 +296,7 @@ class CalcController{
                 this.pushOperation(value);
             }else{
                 let newValue = this.getLastOperation().toString() + value.toString(); //concatenamos o ultimo valor com o valor digitado
-                this.setLastOperation(parseInt(newValue)); // inserimos o resultado do newValue convertido em int para o o array como um numero inteiro
+                this.setLastOperation(newValue); // inserimos o resultado do newValue convertido em int para o o array como um numero inteiro
 
                 //atualizar display
 
@@ -208,11 +312,27 @@ class CalcController{
         this.displayCalc = "Error";
     }
 
+    addDot(){
+
+        let lastOperation = this.getLastOperation();
+
+        if(typeof lastOperation === 'string' && lastOperation.split('').indexOf('.') > -1) return; 
+
+        if(this.isOperator(lastOperation)|| !lastOperation){
+            this.pushOperation('0.');
+        } else {
+            this.setLastOperation(lastOperation.toString() + '.');
+        }
+
+        this.setLastNumberToDisplay();
+
+    }
+
     execBtn(value){ // criamos a function execBtn para verificar e executar os valores do botão.
+        this.playAudio();
         switch(value){
             case 'ac':
-                this.clearAll();
-                
+                this.clearAll();                
                 break;
             case 'ce':
                 this.clearEntry();
@@ -236,7 +356,7 @@ class CalcController{
                 this.calc();
                 break;
             case 'ponto':
-                this.addOperation('.');
+                this.addDot();
                 break;
             case '0':
             case '1': 
