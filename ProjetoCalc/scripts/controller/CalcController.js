@@ -1,6 +1,9 @@
 class CalcController{
 
     constructor(){
+        this._lastOperator = '';
+        this._lastNumber = '';
+
         this._operation = [];
         let date = new Date(); //estamos instanciando a classe Date();
         this._locale = "pt-BR";
@@ -26,7 +29,7 @@ class CalcController{
         }, 10000); */       
 
         //===================================================\\
-
+        this.setLastNumberToDisplay();
     } // end initialize
 
     setDisplayDateTime(){ // function setDisplayTime setada para indicar data e hora
@@ -68,11 +71,13 @@ class CalcController{
 
     clearAll(){ //function clearAll
         this._operation = [];
+        this.setLastNumberToDisplay();
     } // end function clearALL
 
 
     clearEntry(){ // function limpa ultimo valor
         this._operation.pop();
+        this.setLastNumberToDisplay();
     } //end function clearEntry
 
     getLastOperation(){ // function para pegar o ultimo valor
@@ -89,16 +94,81 @@ class CalcController{
 
     pushOperation(value){
         this._operation.push(value);
-        if(this._operation.length > 3){
-            this.calc();
-        }
+        
+        if(this._operation.length>3 )this.calc();
+    }
+
+    getResult(){
+        return  eval(this._operation.join(""));
     }
 
     calc(){
-        let last = this._operation.pop();
-        let result = eval(his._operation.join());
 
-        this._operation = [result, last];
+        let last ='';
+
+        this._lastOperator = this.getLastItem();
+
+        if(this._operation.length < 3){
+            let firstItem = this._operation[0];
+            this._operation = [firstItem, this._lastOperator, this._lastNumber];
+        }
+
+        if(this._operation.length > 3 ) {
+            last = this._operation.pop();
+            
+            this._lastNumber = this.getResult();
+        }else if(this._operation.length == 3){
+            
+            this._lastNumber = this.getLastItem(false);
+        }
+
+        
+
+        
+        let result = this.getResult();
+
+        if(last =='%'){
+
+            result /= 100;
+            this._operation = [result];
+
+        }else{
+
+            this._operation = [result];
+
+            if(last) this._operation.push(last);
+
+        }
+
+        this.setLastNumberToDisplay();
+
+    }
+
+    getLastItem(isOperator = true){
+        let lastItem; 
+
+        for(let i = this._operation.length -1 ; i >= 0 ; i--){
+            if(this.isOperator(this._operation[i]) == isOperator){
+                lastItem = this._operation[i];
+                break
+            }
+        }
+
+        if(!lastItem){
+            lastItem = (isOperator) ? this._lastOperator : this._lastNumber;
+        }
+
+        return lastItem;
+    }
+
+    setLastNumberToDisplay(){
+
+        let lastNumber = this.getLastItem(false); 
+
+
+        if(!lastNumber) lastNumber = 0;
+
+        this.displayCalc = lastNumber;
 
     }
 
@@ -112,13 +182,14 @@ class CalcController{
             }else if (isNaN(value)){ // valida se o ultimo numero digitado é um numero 
                 console.log(value); //imprime o valor
             }else{// caso não seja os valores acima, vai inserir um valor
-                pushOperation(value);
+              this.pushOperation(value);
+              this.setLastNumberToDisplay();
             }
         }else { // caso seja um numero 
             //Number
 
             if(this.isOperator(value)){
-                pushOperation(value);
+                this.pushOperation(value);
             }else{
                 let newValue = this.getLastOperation().toString() + value.toString(); //concatenamos o ultimo valor com o valor digitado
                 this.setLastOperation(parseInt(newValue)); // inserimos o resultado do newValue convertido em int para o o array como um numero inteiro
@@ -141,6 +212,7 @@ class CalcController{
         switch(value){
             case 'ac':
                 this.clearAll();
+                
                 break;
             case 'ce':
                 this.clearEntry();
@@ -161,7 +233,7 @@ class CalcController{
                 this.addOperation('%');
                 break;
             case 'igual':
-                
+                this.calc();
                 break;
             case 'ponto':
                 this.addOperation('.');
