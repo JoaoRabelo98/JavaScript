@@ -29,14 +29,14 @@ class CalcController{
 
     } // end initialize
 
-    setDisplayDateTime(){
+    setDisplayDateTime(){ // function setDisplayTime setada para indicar data e hora
         this.displayDate = this.currentDate.toLocaleDateString(this._locale,{
             day: "2-digit", 
             month: "long", 
             year:"numeric"
         });
         this.displayTime = this.currentDate.toLocaleTimeString(this._locale);
-    }
+    } // end setDisplayTime
 
     get displayCalc(){ // start getDisplay
         return this._displayCalcEl.innerHTML;
@@ -64,20 +64,73 @@ class CalcController{
     set displayDate(value){  // start setDisplayDate
         this._dateCalcEl.innerHTML = value; 
     } // end setDisplayDate
-//===============================================================================\\
+//===============================================================================\\ 
 
-    clearAll(){
+    clearAll(){ //function clearAll
         this._operation = [];
+    } // end function clearALL
+
+
+    clearEntry(){ // function limpa ultimo valor
+        this._operation.pop();
+    } //end function clearEntry
+
+    getLastOperation(){ // function para pegar o ultimo valor
+        return this._operation[this._operation.length - 1];
+    } //end getLastOperation
+
+    isOperator(value){ // function para verificar se é um operador
+        return (['+','-','*','%','/'].indexOf(value) > -1 ) ;
+    } // end isOperator
+
+    setLastOperation(value){ //function setLastOperation setada para substituir o ultimo valor 
+        this._operation[this._operation.length - 1] = value;
+    } // end setLastOperation
+
+    pushOperation(value){
+        this._operation.push(value);
+        if(this._operation.length > 3){
+            this.calc();
+        }
     }
 
+    calc(){
+        let last = this._operation.pop();
+        let result = eval(his._operation.join());
 
-    clearEntry(){
-        this._operation.pop();
+        this._operation = [result, last];
+
     }
 
     addOperation(value){
-        this._operation.push(value);
-        console.log(this._operation);
+        
+
+        if(isNaN(this.getLastOperation())){ // verificando se o ultimo numero não é um numero
+            //String
+            if(this.isOperator(value)){ // verificando se é um operador utilizando o metodo isOperator
+                this.setLastOperation(value); 
+            }else if (isNaN(value)){ // valida se o ultimo numero digitado é um numero 
+                console.log(value); //imprime o valor
+            }else{// caso não seja os valores acima, vai inserir um valor
+                pushOperation(value);
+            }
+        }else { // caso seja um numero 
+            //Number
+
+            if(this.isOperator(value)){
+                pushOperation(value);
+            }else{
+                let newValue = this.getLastOperation().toString() + value.toString(); //concatenamos o ultimo valor com o valor digitado
+                this.setLastOperation(parseInt(newValue)); // inserimos o resultado do newValue convertido em int para o o array como um numero inteiro
+
+                //atualizar display
+
+                this.setLastNumberToDisplay();
+            }
+           
+        }
+
+       
     }
 
     setError(){
@@ -93,22 +146,25 @@ class CalcController{
                 this.clearEntry();
                 break;
             case 'soma':
-                
+                this.addOperation('+');
                 break;
             case 'subtracao':
-                
+                this.addOperation('-');
                 break;
             case 'divisao':
-                
+                this.addOperation('/');
                 break;
             case 'multiplicacao':
-                
+                this.addOperation('*');
                 break;
             case 'porcento':
-                
+                this.addOperation('%');
                 break;
             case 'igual':
                 
+                break;
+            case 'ponto':
+                this.addOperation('.');
                 break;
             case '0':
             case '1': 
