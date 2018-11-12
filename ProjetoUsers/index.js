@@ -1,17 +1,43 @@
-let inputName = document.querySelector("#exampleInputName"); 
-let inputCheckedGen = document.querySelectorAll("#form-user-create [name=gender]:checked");
-let inputDateNasc = document.querySelector("#exampleInputBirth");
-let inputCuntry  = document.querySelector("#exampleInputCountry");
-let inputEmail = document.querySelector("#exampleInputEmail");
-let inputPasswd = document.querySelector("#exampleInputPassword");
-let inputFile = document.querySelector("#exampleinputFile");
-let inputAdmin = document.querySelector("#exampleInputAdmin");
+let fields = document.querySelectorAll("#form-user-create [name]");
 
-inputName.value = "João Vitor Rabelo Rezende";
-inputCheckedGen.checked = true; 
-inputDateNasc.value = "1998-03-05"
-inputCuntry.value = "China";
-inputEmail.value = "joaorabello99@gmail.com";
-inputPasswd.value = "joao1234";
-inputAdmin.checked = true; 
+let newUser = {};
 
+function addLine(dataUser){
+    currentDate = new Date();
+
+    currentDate = currentDate.toLocaleDateString("pt-BR");
+
+    var tr = document.createElement("tr");
+    tr.innerHTML = `
+    <tr>
+        <td><img src="dist/img/user1-128x128.jpg" alt="User Image" class="img-circle img-sm"></td>
+        <td>${dataUser.name}</td>
+        <td>${dataUser.email}</td>
+        <td>${dataUser.admin}</td>
+        <td>${currentDate}</td>
+        <td>
+            <button type="button" class="btn btn-primary btn-xs btn-flat">Editar</button>
+            <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
+        </td>
+    </tr>
+    `;
+
+    document.getElementById("table-users").appendChild(tr);
+
+}
+
+document.getElementById("form-user-create").addEventListener("submit", function(event){
+    event.preventDefault(); // cancela o ato padrão do envio do form 
+    fields.forEach(function(field, index){
+    
+        if (field.name === 'gender' && field.checked) {
+            newUser[field.name] = field.value;
+        }else if(field.name === 'admin' && field.checked == false){
+            newUser[field.name] = 'off';
+        }else if (field.name !== 'gender') {
+            newUser[field.name] = field.value;
+        }
+
+    });
+    addLine(newUser);
+});
