@@ -7,8 +7,10 @@ function addLine(dataUser){
 
     currentDate = currentDate.toLocaleDateString("pt-BR");
 
-    var tr = document.createElement("tr");
-    tr.innerHTML = `
+
+    
+    
+    document.getElementById("table-users").innerHTML = `
     <tr>
         <td><img src="dist/img/user1-128x128.jpg" alt="User Image" class="img-circle img-sm"></td>
         <td>${dataUser.name}</td>
@@ -21,9 +23,6 @@ function addLine(dataUser){
         </td>
     </tr>
     `;
-
-    document.getElementById("table-users").appendChild(tr);
-
 }
 
 document.getElementById("form-user-create").addEventListener("submit", function(event){
@@ -33,7 +32,7 @@ document.getElementById("form-user-create").addEventListener("submit", function(
         if (field.name === 'gender' && field.checked) {
             newUser[field.name] = field.value;
         }else if(field.name === 'admin' && field.checked == false){
-            newUser[field.name] = 'off';
+            newUser[field.name] = 'Não';
         }else if (field.name !== 'gender') {
             newUser[field.name] = field.value;
         }
