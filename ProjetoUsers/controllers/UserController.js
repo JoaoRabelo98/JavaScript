@@ -16,13 +16,10 @@ class UserController{
 
             let values = this.getValues();
 
-            
-
-            this.getPhoto((content)=>{
+            this.getPhoto((content) => {
                 values.photo = content;
-                this.addLine(this.getValues()); //function addLine
+                this.addLine(values); 
             });
-
            
         });
     } //end submit
@@ -31,13 +28,13 @@ class UserController{
         let fileReader = new FileReader(); // chamamos a api do file reader.
 
         let elements = [...this.formEl.elements].filter(item => {
-            if(item.name === "photo") {
+            if(item.name === 'photo') {
                 return item; 
             } 
         });
         
         let file = elements[0].files[0];
-
+        
         fileReader.onload = ()=>{
 
             callBack(fileReader.result);
