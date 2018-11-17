@@ -14,13 +14,18 @@ class UserController{
 
             event.preventDefault(); // cancela o ato padrão do envio do form 
 
+            let btn = this.formEl.querySelector("[type =submit]");
+
+            btn.disabled = true; 
+
             let values = this.getValues();
 
             this.getPhoto().then((content)=>{
                 // primeira function
                 values.photo = content;
                 this.addLine(values); 
-
+                btn.disabled = false; 
+                this.formEl.reset();
             }, (e)=>{
                 // segunda function
                 console.error(e);
@@ -56,36 +61,49 @@ class UserController{
                 reject(e);
             };
 
-            fileReader.readAsDataURL(file);
+            if(file) fileReader.readAsDataURL(file);
+            else {
+                resolve('dist/img/avatardefault.png');
+            }
 
         });
 
     } // end getPhoto
 
     addLine(dataUser){ // criada a funciton addLine para adicionar uma nova linha de usuário
-        let currentDate = new Date();
-        currentDate = currentDate.toLocaleDateString("pt-BR");
-        this.tableEl.innerHTML = ` 
-        <tr>
+        
+        let locale = "pt-BR";
+
+        let tr = document.createElement('tr');
+
+        tr.innerHTML = ` 
+        
             <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
             <td>${dataUser.name}</td>
             <td>${dataUser.email}</td>
             <td>${dataUser.admin}</td>
-            <td>${currentDate}</td>
+            <td>${dataUser.register.toLocaleDateString(locale)}</td>
             <td>
                 <button type="button" class="btn btn-primary btn-xs btn-flat">Editar</button>
                 <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
             </td>
-        </tr>
+        
         `;
+        this.tableEl.appendChild(tr); 
+
     } // end addLine
 
     getValues(){ //start getValues 
 
         let newUser = {};
-        
+        let isValid = true; 
         [...this.formEl.elements].forEach(function(field, index){ // estamos rodando os valores do form com um foreach 
-    
+
+            if(['name','email','password','country'].indexOf(field.name) > -1 && !field.value){
+                field.parentElement.classList.add('has-error');
+                isValid = false;  
+            }
+
             if (field.name === 'gender' && field.checked) {
                 newUser[field.name] = field.value;
             }else if(field.name === 'admin' && field.checked == false){
@@ -95,7 +113,9 @@ class UserController{
             }
     
         });
-    
+        
+       if(!isValid) return false; 
+
        return new User( // instanciamos a class user
             newUser.name,
             newUser.gender,
