@@ -16,18 +16,27 @@ class UserController{
 
             let values = this.getValues();
 
-            this.getPhoto((content) => {
+            this.getPhoto().then((content)=>{
+                // primeira function
                 values.photo = content;
                 this.addLine(values); 
+
+            }, (e)=>{
+                // segunda function
+                console.error(e);
+
             });
+
+           
            
         });
     } //end submit
 
-    getPhoto(callBack){ //start metodo getPhoto
+    getPhoto(){ //start metodo getPhoto
 
-      
-        let fileReader = new FileReader(); // chamamos a api do file reader.
+        return new Promise((resolve, reject)=>{
+
+            let fileReader = new FileReader(); // chamamos a api do file reader.
 
             let elements = [...this.formEl.elements].filter(item => {
                 if(item.name === 'photo') {
@@ -39,13 +48,18 @@ class UserController{
             
             fileReader.onload = ()=>{
 
-                callBack(fileReader.result);
+                resolve(fileReader.result);
 
+            };
+
+            fileReader.onerror = (e) => {
+                reject(e);
             };
 
             fileReader.readAsDataURL(file);
 
-        
+        });
+
     } // end getPhoto
 
     addLine(dataUser){ // criada a funciton addLine para adicionar uma nova linha de usuário
