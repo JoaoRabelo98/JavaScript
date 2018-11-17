@@ -16,25 +16,18 @@ class UserController{
 
             let values = this.getValues();
 
-            this.getPhoto().then(function(){
-
-            },function(){
-                
-            });
-
             this.getPhoto((content) => {
                 values.photo = content;
                 this.addLine(values); 
             });
-            this.addLine(values);
+           
         });
     } //end submit
 
-    getPhoto(){ //start metodo getPhoto
+    getPhoto(callBack){ //start metodo getPhoto
 
-        return Promise(function(resolve, reject ){
-
-            let fileReader = new FileReader(); // chamamos a api do file reader.
+      
+        let fileReader = new FileReader(); // chamamos a api do file reader.
 
             let elements = [...this.formEl.elements].filter(item => {
                 if(item.name === 'photo') {
@@ -46,16 +39,11 @@ class UserController{
             
             fileReader.onload = ()=>{
 
-                resolve(fileReader.result);
+                callBack(fileReader.result);
 
-            };
-
-            fileReader.onerror =() =>{
-                reject(e);
             };
 
             fileReader.readAsDataURL(file);
-        });
 
         
     } // end getPhoto
