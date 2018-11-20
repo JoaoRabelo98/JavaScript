@@ -5,8 +5,15 @@ class UserController{
         this.formEl = document.getElementById(formId);
 
         this.onSubmit();
+        this.onEdit();
 
     } //end constructor
+
+    onEdit(){
+        document.querySelector("#box-user-update .btn-cancel").addEventListener("click",e=>{
+            this.showPanelCreate();
+        });
+    }
 
     onSubmit(){ //start submit
 
@@ -29,6 +36,8 @@ class UserController{
                 console.error(e);
                
             });
+
+            this.formEl.reset();
            
         });
     } //end submit
@@ -82,14 +91,52 @@ class UserController{
             <td>${(!dataUser.admin) ? "Não" : "Sim"}</td>
             <td>${dataUser.register.toLocaleDateString(locale)}</td>
             <td>
-                <button type="button" class="btn btn-primary btn-xs btn-flat">Editar</button>
+                <button type="button" class="btn btn-primary btn-edit btn-xs btn-flat">Editar</button>
                 <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
             </td>
         
         `;
         this.tableEl.appendChild(tr); 
 
+       
         this.updateCount();
+
+        tr.querySelector(".btn-edit").addEventListener('click', e=>{
+            let json = JSON.parse(tr.dataset.user);
+            let form = document.querySelector("#form-user-update");
+
+            for (let name in json){
+                let field = form.querySelector("[name=" + name.replace("_","")+"]");
+                
+                if(field) {
+                    
+
+                    switch(field.type){
+                        case 'file':
+                            continue;
+                        break;
+
+                        case 'radio':
+                            field = form.querySelector("[name=" + name.replace("_","")+"][value="+ json[name] +"]");
+                            field.checked = true; 
+                        break; 
+
+                        case 'checkbox':
+                            field.checked = json[name];
+                        break;
+
+                        default:
+                            field.value = json[name];
+
+                    }
+
+                    
+                }
+            }
+
+            this.showPanelUpdate();
+        });
+
 
     } // end addLine
 
@@ -98,18 +145,32 @@ class UserController{
         let numberUsers = 0; 
         let numberAdmin = 0; 
 
+        console.log(document.querySelectorAll("number-users"));
+
+
+
         [...this.tableEl.children].forEach(tr=>{
             numberUsers++;
             
             let user = JSON.parse(tr.dataset.user);
 
-            if(user._admin) numberAdmin ++; 
+            if(user._admin) numberAdmin++; 
 
         });
 
         document.querySelector("#number-users").innerHTML = numberUsers;
         document.querySelector("#number-users-admin").innerHTML = numberAdmin;
 
+    }
+
+    showPanelCreate(){
+        document.querySelector("#box-user-create").style.display = "block";
+        document.querySelector("#box-user-update").style.display = "none";
+    }
+
+    showPanelUpdate(){
+        document.querySelector("#box-user-create").style.display = "none";
+        document.querySelector("#box-user-update").style.display = "block";
     }
 
     getValues(){ //start getValues 
